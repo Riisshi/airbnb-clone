@@ -1,69 +1,102 @@
-import React,{useState} from 'react'
+// src/components/pages/Login.jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import './Login.css';
 
-const Login = () => {
+function Login() {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rememberMe: false
+  });
+  const [message, setMessage] = useState('');
 
-  const [username,setUsername] = useState('');
-  const [password,setPassword] = useState('');
-  const [rememberMe,setRememberMe] = useState(false)
-  const [message,setMessage] = useState('');
-
-  const handleSubmit=(e)=>{
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if(!username || !password){
-      setMessage("Please fill in all fields")
-      return;
-    }
-
-    if(username==='admin' && password==="password"){
-      setMessage("Login successful!");
-    }else{
-      setMessage("Invalid credentials.");
-    }
-  }
-
-  const handleForgotPassword=()=>{
-    setMessage("Password reset link would be sent to your email.")
-  }
-
-  const handleSignup = () =>{
-    setMessage("Redirecting to SignUp Page");
-  }
-  
+    // Handle login logic
+  };
 
   return (
-    <div>
-      <h1>Login</h1>
-
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label><br />
-          <input type="text" value={username} onChange={(e)=>{setUsername(e.target.value)} } required />
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-header">
+          <h1 className="login-title">Welcome back</h1>
+          <p className="login-subtitle">Sign in to your account</p>
         </div>
-        <div>
-          <label>Password</label><br />
-          <input type="password" value={password} onChange={(e)=>{setPassword(e.target.value)}} required />
-        </div>
-        <div>
-          <label>
-            <input type="checkbox" checked={rememberMe} onChange={(e)=>{setRememberMe(e.target.checked)}} />
-            Remember me
-          </label>
-        </div>
-
-        <div>
-          <button type='submit'>Login</button>
-        </div>
-      </form>
-
-      <div>
-        <button onClick={handleForgotPassword}>Forgot Password?</button>
-        <button onClick={handleSignup}>SignUp</button>
+        
+        <form className="login-form" onSubmit={handleSubmit}>
+          {message && (
+            <div className={`login-message ${message.includes('success') ? 'success' : 'error'}`}>
+              {message}
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label className="form-label">Email address</label>
+            <input
+              className="form-input"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              className="form-input"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          
+          <div className="checkbox-group">
+            <input
+              className="checkbox-input"
+              type="checkbox"
+              checked={formData.rememberMe}
+              onChange={(e) => setFormData({...formData, rememberMe: e.target.checked})}
+              id="remember"
+            />
+            <label className="checkbox-label" htmlFor="remember">
+              Remember me
+            </label>
+          </div>
+          
+          <button className="login-button" type="submit">
+            Sign in
+          </button>
+          
+          <div className="login-divider">
+            <span className="divider-text">Or continue with</span>
+          </div>
+          
+          <div className="social-login">
+            <button className="social-button google-button" type="button">
+              <span className="social-icon">G</span>
+              Google
+            </button>
+            <button className="social-button facebook-button" type="button">
+              <span className="social-icon">f</span>
+              Facebook
+            </button>
+          </div>
+          
+          <div className="login-footer">
+            Don't have an account? 
+            <Link to="/signup" className="login-link">
+              Sign up
+            </Link>
+          </div>
+        </form>
       </div>
-
-      {message && <div>{message}</div>}
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

@@ -1,27 +1,27 @@
-import React from 'react'
-import { BrowserRouter ,Route,Routes,Link} from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import Navbar from './components/Navbar'
-import './App.css'
+// src/App.jsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import HomePage from './pages/HomePage';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import './App.css';
 
-
-
-const App = () => {
+function App() {
   return (
-    <div>
-      <BrowserRouter>
-        <Navbar/>
-
+    <Router>
+      <div className="App">
+        <Navbar />
         <Routes>
-          <Route path="/" element={<HomePage />}/>
-          <Route path="/login" element={<Login />}/>
-          <Route path="signup" element={<Signup />}/>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/property/:id" element={<PropertyDetailsPage />} />
         </Routes>
-      </BrowserRouter>      
-    </div>
-  )
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;
