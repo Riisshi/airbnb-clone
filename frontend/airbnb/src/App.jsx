@@ -1,9 +1,9 @@
 import React from 'react'
 import { BrowserRouter ,Route,Routes,Link} from 'react-router-dom'
-import HomePage from '../pages/HomePage'
-import Login from '../pages/Login'
-import Signup from '../pages/Signup'
-import Navbar from '../components/Navbar'
+import HomePage from './pages/HomePage'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import Navbar from './components/Navbar'
 import './App.css'
 
 
