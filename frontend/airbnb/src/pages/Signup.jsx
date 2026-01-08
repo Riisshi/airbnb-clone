@@ -1,9 +1,11 @@
 // src/components/pages/Signup.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Signup.css';
 
 function Signup() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -12,7 +14,10 @@ function Signup() {
     confirmPassword: '',
     agreeTerms: false
   });
+
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,33 +27,49 @@ function Signup() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    }
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    if (!formData.agreeTerms) {
-      newErrors.agreeTerms = 'You must agree to the terms';
-    }
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.password) newErrors.password = 'Password is required';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    if (!formData.agreeTerms) newErrors.agreeTerms = 'You must agree to the terms';
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) {
-      console.log('Form submitted:', formData);
-      // TODO: Add API call to register user
+    if (Object.keys(newErrors).length !== 0) return;
+
+    try {
+      setLoading(true);
+      setServerError("");
+
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setServerError(data.message || "Registration failed");
+        setLoading(false);
+        return;
+      }
+
+      alert("Registration successful. Please login.");
+      navigate("/login");
+
+    } catch (error) {
+      setServerError("Server error. Try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
