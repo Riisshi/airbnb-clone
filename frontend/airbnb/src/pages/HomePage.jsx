@@ -1,33 +1,36 @@
-// src/components/pages/HomePage.jsx
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import './HomePage.css';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { properties } from '../data/properties';  // Import the properties
+//import './App.css';
 
 function HomePage() {
+  const navigate = useNavigate();
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
   const [searchData, setSearchData] = useState({
     location: '',
     checkIn: '',
     checkOut: '',
-    guests: 1
+    guests: 2
   });
   
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
     { id: 'all', label: 'All' },
-    { id: 'beach', label: 'Beach' },
-    { id: 'mountain', label: 'Mountain' },
-    { id: 'city', label: 'City' }
+    { id: 'Beach', label: 'Beach' },
+    { id: 'Mountain', label: 'Mountain' },
+    { id: 'City', label: 'City' },
+    { id: 'Countryside', label: 'Countryside' },
+    { id: 'Lake', label: 'Lake' },
+    { id: 'Desert', label: 'Desert' }
   ];
 
-  const properties = [
-    { id: 1, title: 'Cozy Beach House', city: 'Miami', rating: 4.8, price: 150 },
-    { id: 2, title: 'Mountain Cabin', city: 'Denver', rating: 4.9, price: 200 }
-  ];
-
-  const filteredProperties = selectedCategory === 'all' 
-    ? properties 
-    : properties.filter(p => p.category === selectedCategory);
+  useEffect(() => {
+    // Load properties on component mount
+    setListings(properties.slice(0, 8)); // Show only 8 on homepage
+  }, []);
 
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
@@ -38,10 +41,35 @@ function HomePage() {
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    console.log('Search submitted:', searchData);
-    // Add navigation or search logic here
+  e.preventDefault();
+  
+  // Create query parameters
+  const params = new URLSearchParams();
+  if (searchData.location) params.append('location', searchData.location);
+  if (selectedCategory !== 'all') params.append('category', selectedCategory);
+  if (searchData.checkIn) params.append('checkIn', searchData.checkIn);
+  if (searchData.checkOut) params.append('checkOut', searchData.checkOut);
+  if (searchData.guests > 2) params.append('guests', searchData.guests);
+  
+  console.log("Navigating to search with params:", params.toString());
+  
+  // Navigate to search results
+  navigate(`/search?${params.toString()}`);
+};
+
+  const handleCategoryClick = (categoryId) => {
+    setSelectedCategory(categoryId);
+    
+    // If clicking a category, navigate to search results with that category
+    if (categoryId !== 'all') {
+      navigate(`/search?category=${categoryId}`);
+    }
   };
+
+  // Filter properties by selected category for homepage display
+  const filteredListings = selectedCategory === 'all' 
+    ? listings 
+    : listings.filter(listing => listing.category === selectedCategory);
 
   return (
     <div className="homepage">
@@ -74,6 +102,7 @@ function HomePage() {
                 name="checkIn"
                 value={searchData.checkIn}
                 onChange={handleSearchChange}
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
             
@@ -85,24 +114,28 @@ function HomePage() {
                 name="checkOut"
                 value={searchData.checkOut}
                 onChange={handleSearchChange}
+                min={searchData.checkIn || new Date().toISOString().split('T')[0]}
               />
             </div>
             
             <div className="search-field">
               <label className="search-label">Guests</label>
-              <input
-                className="search-input"
-                type="number"
-                name="guests"
-                value={searchData.guests}
-                onChange={handleSearchChange}
-                min="1"
-                max="16"
-              />
+              <div className="guest-selector">
+                <input
+                  className="search-input"
+                  type="number"
+                  name="guests"
+                  value={searchData.guests}
+                  onChange={handleSearchChange}
+                  min="1"
+                  max="16"
+                  style={{ padding: 0 }}
+                />
+              </div>
             </div>
             
             <button className="search-button" type="submit">
-              Search
+              🔍 Search
             </button>
           </div>
         </form>
@@ -116,7 +149,7 @@ function HomePage() {
             <button
               key={category.id}
               className={`category-button ${selectedCategory === category.id ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => handleCategoryClick(category.id)}
             >
               {category.label}
             </button>
@@ -128,27 +161,83 @@ function HomePage() {
       <section className="properties-section">
         <h2 className="section-title">Popular properties</h2>
         <div className="properties-grid">
-          {filteredProperties.map(property => (
-            <div key={property.id} className="property-card">
-              <div className="property-image">
-                <div className="property-image-placeholder">
-                  {property.title}
+          {filteredListings.map(listing => (
+            <div key={listing._id} className="property-card">
+              <Link to={`/property/${listing._id}`}>
+                <div className="property-image">
+                  {listing.images && listing.images.length > 0 ? (
+                    <div className="property-image-placeholder" 
+                         style={{ 
+                           background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
+                           width: '100%',
+                           height: '100%',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           color: 'white',
+                           fontSize: '20px',
+                           fontWeight: '600'
+                         }}>
+                      {listing.title}
+                    </div>
+                  ) : (
+                    <div className="property-image-placeholder">
+                      {listing.title}
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="property-content">
-                <h3 className="property-title">{property.title}</h3>
-                <p className="property-location">📍 {property.city}</p>
-                <p className="property-rating">⭐ {property.rating}</p>
-                <p className="property-price"><strong>${property.price}</strong> / night</p>
-                <Link to={`/property/${property.id}`}>
-                  <button className="property-button">
-                    View details
-                  </button>
-                </Link>
-              </div>
+                <div className="property-content">
+                  <h3 className="property-title">{listing.title}</h3>
+                  <p className="property-location">📍 {listing.location}</p>
+                  <p className="property-category" style={{ 
+                    display: 'inline-block',
+                    background: '#F7F7F7',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    marginBottom: '10px'
+                  }}>
+                    {listing.category}
+                  </p>
+                  {listing.rating > 0 && (
+                    <p className="property-rating">⭐ {listing.rating} ({listing.reviewsCount} reviews)</p>
+                  )}
+                  <p className="property-price"><strong>${listing.pricePerNight}</strong> / night</p>
+                  <div className="property-details" style={{ 
+                    display: 'flex',
+                    gap: '10px',
+                    color: '#717171',
+                    fontSize: '14px',
+                    marginTop: '10px'
+                  }}>
+                    <span>{listing.bedrooms} bedroom{listing.bedrooms !== 1 ? 's' : ''}</span>
+                    <span>•</span>
+                    <span>{listing.beds} bed{listing.beds !== 1 ? 's' : ''}</span>
+                    <span>•</span>
+                    <span>{listing.bathrooms} bathroom{listing.bathrooms !== 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+              </Link>
             </div>
           ))}
         </div>
+        
+        {filteredListings.length > 0 && (
+          <div className="view-all-container" style={{ textAlign: 'center', marginTop: '40px' }}>
+            <Link to="/search" className="view-all-button" style={{
+              background: '#FF385C',
+              color: 'white',
+              padding: '15px 30px',
+              borderRadius: '12px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              display: 'inline-block'
+            }}>
+              View all properties →
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Footer */}

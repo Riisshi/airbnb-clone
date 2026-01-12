@@ -1,27 +1,49 @@
-/* src/index.css */
+/* COMPLETE RESET AND BASE STYLES */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 14px;
+  color: #222222;
+  background: white;
+  line-height: 1.4;
 }
 
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* Remove all default button styles */
+button {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Remove all default link styles */
 a {
   text-decoration: none;
   color: inherit;
 }
 
-button {
-  font-family: inherit;
+/* Remove all default input styles */
+input, textarea, select {
+  font: inherit;
+  border: none;
+  background: none;
+  outline: none;
 }
 
-.App {
-  min-height: 100vh;
+/* Remove list styles */
+ul, ol {
+  list-style: none;
 }
