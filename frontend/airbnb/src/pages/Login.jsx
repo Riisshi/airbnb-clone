@@ -1,19 +1,59 @@
-// src/components/pages/Login.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
-  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic
+    setMessage("");
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Invalid credentials");
+        setLoading(false);
+        return;
+      }
+
+      // Store token
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setMessage("Login successful!");
+
+      // Redirect to home page
+      setTimeout(() => {
+        navigate("/");
+      }, 800);
+
+    } catch (error) {
+      setMessage("Server error. Try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,14 +63,14 @@ function Login() {
           <h1 className="login-title">Welcome back</h1>
           <p className="login-subtitle">Sign in to your account</p>
         </div>
-        
+
         <form className="login-form" onSubmit={handleSubmit}>
           {message && (
-            <div className={`login-message ${message.includes('success') ? 'success' : 'error'}`}>
+            <div className={`login-message ${message.includes('successful') ? 'success' : 'error'}`}>
               {message}
             </div>
           )}
-          
+
           <div className="form-group">
             <label className="form-label">Email address</label>
             <input
@@ -42,7 +82,7 @@ function Login() {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label className="form-label">Password</label>
             <input
@@ -54,7 +94,7 @@ function Login() {
               required
             />
           </div>
-          
+
           <div className="checkbox-group">
             <input
               className="checkbox-input"
@@ -67,15 +107,15 @@ function Login() {
               Remember me
             </label>
           </div>
-          
-          <button className="login-button" type="submit">
-            Sign in
+
+          <button className="login-button" type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Sign in"}
           </button>
-          
+
           <div className="login-divider">
             <span className="divider-text">Or continue with</span>
           </div>
-          
+
           <div className="social-login">
             <button className="social-button google-button" type="button">
               <span className="social-icon">G</span>
@@ -86,7 +126,7 @@ function Login() {
               Facebook
             </button>
           </div>
-          
+
           <div className="login-footer">
             Don't have an account? 
             <Link to="/signup" className="login-link">
